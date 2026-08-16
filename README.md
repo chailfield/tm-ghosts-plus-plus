@@ -2,15 +2,10 @@
 
 **Requires MLHook** -- you must also have MLHook installed.
 
-## Acknowledgment
-
-Based on [XertroV's Ghosts++ plugin, licensed under the Unlicense](https://github.com/XertroV/tm-ghosts-plus-plus?tab=Unlicense-1-ov-file).
-
 ## Features
 
 - A better scrubber experience -- stutterless pausing, slowmo playback, cam control, and more.
 - Save others' ghosts and load them later (even if their record improves).
-- Load the world-record ghost on demand from the Current Ghosts list.
 - See ghost inputs without hiding PB ghost.
 - Integration with in-game records UI.
 - Load AT / CM medal ghosts.
@@ -52,7 +47,6 @@ Current Ghosts:
 * Spectate any ghost (does not restart run)
 * Save a ghost for later (note: technically saves the current record of that user, but precise ghost saving is possible too)
 * Unload a ghost
-* Load the current map's world-record ghost
 
 Load Ghosts
 
@@ -64,14 +58,13 @@ Load Ghosts
 * Load a ghost from a URL
 
 
-License: Public Domain (Unlicense)
+License: Public Domain
 
-Author: Chailfield
-Based on work by: XertroV
+Authors: XertroV
 
 Suggestions/feedback: @XertroV on Openplanet discord
 
-Original code/issues: [https://github.com/XertroV/tm-ghosts-plus-plus](https://github.com/XertroV/tm-ghosts-plus-plus)
+Code/issues: [https://github.com/XertroV/tm-ghosts-plus-plus](https://github.com/XertroV/tm-ghosts-plus-plus)
 
 GL HF
 
