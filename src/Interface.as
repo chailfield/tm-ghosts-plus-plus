@@ -207,6 +207,16 @@ class SaveGhostsTab : Tab {
         }
 
         array<string> seenGhosts;
+        array<uint> visibleGhostIxs;
+        for (uint i = 0; i < mgr.Ghosts.Length; i++) {
+            auto gm = mgr.Ghosts[i].GhostModel;
+            if (gm is null) continue;
+
+            string key = gm.GhostLogin + "|" + gm.GhostNickname + "|" + tostring(gm.RaceTime) + "|" + gm.Validate_ChallengeUid.GetName();
+            if (seenGhosts.Find(key) >= 0) continue;
+            seenGhosts.InsertLast(key);
+            visibleGhostIxs.InsertLast(i);
+        }
 
         UI::PushStyleColor(UI::Col::TableRowBgAlt, vec4(.3, .3, .3, .3));
         auto nbCols = 7;
@@ -221,19 +231,13 @@ class SaveGhostsTab : Tab {
             UI::TableSetupColumn("Save", UI::TableColumnFlags::WidthFixed, 32.);
             UI::TableSetupColumn("Unload", UI::TableColumnFlags::WidthFixed, 32.);
 
-            UI::ListClipper clip(mgr.Ghosts.Length);
+            UI::ListClipper clip(visibleGhostIxs.Length);
             while (clip.Step()) {
-                for (int i = clip.DisplayStart; i < Math::Min(clip.DisplayEnd, mgr.Ghosts.Length); i++) {
-                    auto gm = mgr.Ghosts[i].GhostModel;
-                    if (gm is null) continue;
-
-                    string key = gm.GhostLogin + "|" + gm.GhostNickname + "|" + tostring(gm.RaceTime) + "|" + gm.Validate_ChallengeUid.GetName();
-                    if (seenGhosts.Find(key) >= 0) continue;
-                    seenGhosts.InsertLast(key);
-
-                    UI::PushID(i);
-                    auto id = GhostClipsMgr::GetInstanceIdAtIx(mgr, i);
-                    DrawSaveGhost(mgr.Ghosts[i], i, id);
+                for (int displayIx = clip.DisplayStart; displayIx < Math::Min(clip.DisplayEnd, visibleGhostIxs.Length); displayIx++) {
+                    uint ghostIx = visibleGhostIxs[displayIx];
+                    UI::PushID(ghostIx);
+                    auto id = GhostClipsMgr::GetInstanceIdAtIx(mgr, ghostIx);
+                    DrawSaveGhost(mgr.Ghosts[ghostIx], ghostIx, displayIx, id);
                     UI::PopID();
                 }
             }
@@ -263,7 +267,7 @@ class SaveGhostsTab : Tab {
 #endif
     }
 
-    void DrawSaveGhost(NGameGhostClips_SClipPlayerGhost@ gc, uint i, uint id) {
+    void DrawSaveGhost(NGameGhostClips_SClipPlayerGhost@ gc, uint ghostIx, uint displayIx, uint id) {
         CGameCtnGhost@ gm = gc.GhostModel;
         auto clip = gc.Clip;
         auto rt = Time::Format(gm.RaceTime);
@@ -272,7 +276,7 @@ class SaveGhostsTab : Tab {
 
         UI::TableNextColumn();
         UI::AlignTextToFramePadding();
-        UI::Text(Text::Format("%02d. ", i+1)); // + Text::Format("%08x", id));
+        UI::Text(Text::Format("%02d. ", displayIx + 1)); // + Text::Format("%08x", id));
 #if SIG_DEVELOPER
         AddSimpleTooltip("InstanceId: " + Text::Format("0x%08x", id));
 #endif
@@ -289,26 +293,26 @@ class SaveGhostsTab : Tab {
         UI::Text(rt);
 
         UI::TableNextColumn();
-        bool clicked = UI::Button(Icons::ThList + "##" + i);
+        bool clicked = UI::Button(Icons::ThList + "##" + ghostIx);
         AddSimpleTooltip("Inputs");
         if (clicked) ShowInputs(gm);
 
         UI::TableNextColumn();
-        clicked = UI::Button(Icons::Eye + "##" + i);
+        clicked = UI::Button(Icons::Eye + "##" + ghostIx);
         AddSimpleTooltip("Spectate");
-        if (clicked) startnew(CoroutineFuncUserdataInt64(SpectateGhost), int64(i));
+        if (clicked) startnew(CoroutineFuncUserdataInt64(SpectateGhost), int64(ghostIx));
 
         UI::TableNextColumn();
         UI::BeginDisabled(saving.Find(id) >= 0);
-        clicked = UI::Button(Icons::FloppyO + "##" + i);
+        clicked = UI::Button(Icons::FloppyO + "##" + ghostIx);
         AddSimpleTooltip("Save " + gm.GhostNickname + "'s " + rt + " ghost for later.");
         if (clicked) startnew(CoroutineFuncUserdata(SaveGhost), gm);
         UI::EndDisabled();
 
         UI::TableNextColumn();
-        clicked = UI::Button(Icons::Times + "##" + i);
+        clicked = UI::Button(Icons::Times + "##" + ghostIx);
         AddSimpleTooltip("Unload ghost");
-        if (clicked) UnloadGhost(i);
+        if (clicked) UnloadGhost(ghostIx);
     }
 
     bool IsWorldRecordGhost(CGameCtnGhost@ gm) {
