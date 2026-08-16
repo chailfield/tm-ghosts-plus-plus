@@ -5,8 +5,9 @@ const string[] KnownSafeVersions = {
     "2024-12-04_12_20", "2024-12-12_15_15",
     "2025-07-04_14_15", // "2025-11-07_18_33",
     "2025-12-17_20_05", "2025-12-19_19_41",
+    "2026-02-02_17_51",
 };
-const string configUrl = "https://openplanet.dev/plugin/ghosts-pp/config/version-compat";
+const string configUrl = "https://openplanet.dev/plugin/ghosts-chailfield/config/version-compat";
 
 [Setting hidden]
 string S_SavedOkayGameVersion = "";
@@ -105,10 +106,10 @@ void OverrideGameSafetyCheck_Settings() {
     UI::Text("Check request started: " + tostring(requestStarted));
     UI::Text("Check request ended: " + tostring(requestEnded));
     if (!GameVersionSafe && UI::Button("Disable safety features and run anyway")) {
-        OverrideGameSafetyCheck_GhostsPP();
+        OverrideGameSafetyCheck_GhostsChailfield();
     }
     if (!GameVersionSafe && UI::Button("Disable safety features and run and remember game version")) {
-        OverrideGameSafetyCheck_GhostsPP();
+        OverrideGameSafetyCheck_GhostsChailfield();
         S_SavedOkayGameVersion = TmGameVersion;
     }
 
@@ -120,10 +121,10 @@ void OverrideGameSafetyCheck_Settings() {
     }
 }
 
-void OverrideGameSafetyCheck_GhostsPP(bool safe = true) {
+void OverrideGameSafetyCheck_GhostsChailfield(bool safe = true) {
     GameVersionSafe = safe;
 }
 
-bool IsGameVersionSafe_GhostsPP() {
+bool IsGameVersionSafe_GhostsChailfield() {
     return GameVersionSafe;
 }

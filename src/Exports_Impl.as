@@ -1,4 +1,4 @@
-namespace Ghosts_PP {
+namespace Ghosts_Chailfield {
     void Call_Ghosts_SetStartTime(CSmArenaRulesMode@ ps, uint startTime) {
         ::Call_Ghosts_SetStartTime(ps, startTime);
     }

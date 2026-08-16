@@ -30,9 +30,9 @@ python3 ./pre-proc-scripts.py
 pluginSources=( 'src' )
 
 for pluginSrc in ${pluginSources[@]}; do
-  # if we don't have `dos2unix` below then we need to add `\r` to the `tr -d`
-  PLUGIN_PRETTY_NAME="$(cat ./info.toml | dos2unix | grep '^name' | cut -f 2 -d '=' | tr -d '\"\r' | sed 's/^[ ]*//')"
-  PLUGIN_VERSION="$(cat ./info.toml | dos2unix | grep '^version' | cut -f 2 -d '=' | tr -d '\"\r' | sed 's/^[ ]*//')"
+  TOML_RAW="$(tr -d '\r' < ./info.toml)"
+  PLUGIN_PRETTY_NAME="$(printf '%s\n' "$TOML_RAW" | grep '^name' | cut -f 2 -d '=' | tr -d '\"\r' | sed 's/^[[:space:]]*//')"
+  PLUGIN_VERSION="$(printf '%s\n' "$TOML_RAW" | grep '^version' | cut -f 2 -d '=' | tr -d '\"\r' | sed 's/^[[:space:]]*//')"
 
   # prelim stuff
   case $_build_mode in
@@ -62,13 +62,29 @@ for pluginSrc in ${pluginSources[@]}; do
   BUILD_NAME=$PLUGIN_NAME-$(date +%s).zip
   RELEASE_NAME=$PLUGIN_NAME-$PLUGIN_VERSION.op
   PLUGINS_DIR=${PLUGINS_DIR:-$HOME/win/OpenplanetNext/Plugins}
-  PLUGIN_DEV_LOC=$PLUGINS_DIR/ghosts-pp
+  PLUGIN_DEV_LOC=$PLUGINS_DIR/ghosts-chailfield
   PLUGIN_RELEASE_LOC=$PLUGINS_DIR/$RELEASE_NAME
 
   function buildPlugin {
-    7z a ./$BUILD_NAME ./$pluginSrc/* ./LICENSE ./README.md
+    python3 - "$BUILD_NAME" "$RELEASE_NAME" "$pluginSrc" <<'PY'
+import os, sys, zipfile
+archive_name = sys.argv[1]
+release_name = sys.argv[2]
+plugin_src = sys.argv[3]
+with zipfile.ZipFile(archive_name, 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, dirs, files in os.walk(plugin_src):
+        for name in files:
+            full = os.path.join(root, name)
+            arc = os.path.relpath(full, plugin_src)
+            zf.write(full, arc)
+    for extra in ('LICENSE', 'README.md'):
+        if os.path.exists(extra):
+            zf.write(extra, extra)
 
-    cp -v $BUILD_NAME $RELEASE_NAME
+os.replace(archive_name, release_name)
+PY
+
+    cp -v $RELEASE_NAME $PLUGINS_DIR/$RELEASE_NAME
 
     _colortext16 green "\n✅ Built plugin as ${BUILD_NAME} and copied to ./${RELEASE_NAME}.\n"
   }
@@ -85,30 +101,82 @@ for pluginSrc in ${pluginSources[@]}; do
       cp -LR -v ./$pluginSrc/* $_build_dest/
       # cp -LR -v ./external/* $_build_dest/
       cp -LR -v ./info.toml $_build_dest/
+      python3 - "$RELEASE_NAME" "$PLUGINS_DIR" "$pluginSrc" <<'PY'
+import os, sys, zipfile
+release_name = sys.argv[1]
+plugins_dir = sys.argv[2]
+plugin_src = sys.argv[3]
+archive_path = os.path.join(plugins_dir, release_name)
+with zipfile.ZipFile(archive_path, 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, dirs, files in os.walk(plugin_src):
+        for name in files:
+            full = os.path.join(root, name)
+            arc = os.path.relpath(full, plugin_src)
+            zf.write(full, arc)
+    for extra in ('LICENSE', 'README.md', 'info.toml'):
+        if os.path.exists(extra):
+            zf.write(extra, extra)
+PY
       _copy_exit_code="$?"
       ;;
   esac
 
   case $_build_mode in
     dev)
-      sed -i 's/^\(name[ \t="]*\)\(.*\)"/\1\2 (Dev)"/' $_build_dest/info.toml
-      sed -i 's/^#__DEFINES__/defines = ["DEV"]/' $_build_dest/info.toml
+      python3 - "$_build_dest/info.toml" "DEV" <<'PY'
+import re, sys
+path = sys.argv[1]
+mode = sys.argv[2]
+with open(path, 'r', encoding='utf-8', newline='') as f:
+    text = f.read()
+text = re.sub(r'^(name\s*=\s*")([^"]+)(")', r'\1\2 (Dev)\3', text, count=1, flags=re.M)
+text = text.replace('#__DEFINES__', 'defines = ["' + mode + '"]', 1)
+with open(path, 'w', encoding='utf-8', newline='') as f:
+    f.write(text)
+PY
       ;;
     prerelease)
-      sed -i 's/^\(name[ \t="]*\)\(.*\)"/\1\2 (Prerelease)"/' $_build_dest/info.toml
-      sed -i 's/^#__DEFINES__/defines = ["RELEASE"]/' $_build_dest/info.toml
+      python3 - "$_build_dest/info.toml" "RELEASE" <<'PY'
+import re, sys
+path = sys.argv[1]
+mode = sys.argv[2]
+with open(path, 'r', encoding='utf-8', newline='') as f:
+    text = f.read()
+text = re.sub(r'^(name\s*=\s*")([^"]+)(")', r'\1\2 (Prerelease)\3', text, count=1, flags=re.M)
+text = text.replace('#__DEFINES__', 'defines = ["' + mode + '"]', 1)
+with open(path, 'w', encoding='utf-8', newline='') as f:
+    f.write(text)
+PY
       ;;
     unittest)
-      sed -i 's/^\(name[ \t="]*\)\(.*\)"/\1\2 (UnitTest)"/' $_build_dest/info.toml
-      sed -i 's/^#__DEFINES__/defines = ["UNIT_TEST"]/' $_build_dest/info.toml
+      python3 - "$_build_dest/info.toml" "UNIT_TEST" <<'PY'
+import re, sys
+path = sys.argv[1]
+mode = sys.argv[2]
+with open(path, 'r', encoding='utf-8', newline='') as f:
+    text = f.read()
+text = re.sub(r'^(name\s*=\s*")([^"]+)(")', r'\1\2 (UnitTest)\3', text, count=1, flags=re.M)
+text = text.replace('#__DEFINES__', 'defines = ["' + mode + '"]', 1)
+with open(path, 'w', encoding='utf-8', newline='') as f:
+    f.write(text)
+PY
       ;;
     release)
       cp ./info.toml ./$pluginSrc/info.toml
-      sed -i 's/^#__DEFINES__/defines = ["RELEASE"]/' ./$pluginSrc/info.toml
+      python3 - "./$pluginSrc/info.toml" "RELEASE" <<'PY'
+import re, sys
+path = sys.argv[1]
+mode = sys.argv[2]
+with open(path, 'r', encoding='utf-8', newline='') as f:
+    text = f.read()
+text = text.replace('#__DEFINES__', 'defines = ["' + mode + '"]', 1)
+with open(path, 'w', encoding='utf-8', newline='') as f:
+    f.write(text)
+PY
       buildPlugin
       rm ./$pluginSrc/info.toml
       _build_dest=$PLUGIN_RELEASE_LOC
-      # cp -v $RELEASE_NAME $_build_dest
+  cp -v "$RELEASE_NAME" "$_build_dest"
       # todo: how do we do the release __defines thing?
       _copy_exit_code="$?"
       ;;

@@ -153,10 +153,10 @@ void RunGhostTest() {
 
     sleep(250);
     while (app.PlaygroundScript is null) yield();
-    while (app.PlaygroundScript !is null && Ghosts_PP::GetCurrentGhosts(app) is null) yield();
-    while (app.PlaygroundScript !is null && Ghosts_PP::GetCurrentGhosts(app).Length == 0) yield();
+    while (app.PlaygroundScript !is null && Ghosts_Chailfield::GetCurrentGhosts(app) is null) yield();
+    while (app.PlaygroundScript !is null && Ghosts_Chailfield::GetCurrentGhosts(app).Length == 0) yield();
     if (app.PlaygroundScript !is null) {
-        auto ghosts = Ghosts_PP::GetCurrentGhosts(app);
+        auto ghosts = Ghosts_Chailfield::GetCurrentGhosts(app);
         auto bestGhost = ghosts[0];
         for (uint i = 0; i < ghosts.Length; i++) {
             if (bestGhost.RaceTime > ghosts[i].RaceTime) {

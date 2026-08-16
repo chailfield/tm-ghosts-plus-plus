@@ -123,11 +123,11 @@ float S_GhostOpacityTimeAttack = 0.9;
 float S_GhostOpacitySolo = 0.9;
 
 void DrawGhostOpacityControls(bool compact = false) {
-	S_GhostOpacityOverrideOnline = UI::Checkbox(compact ? "##setghostopac" : "Set Ghost Opacity", S_GhostOpacityOverrideOnline);
+	S_SetGhostAlphaTo1 = UI::Checkbox(compact ? "##setghostopac" : "Set Ghost Opacity", S_SetGhostAlphaTo1);
 	if (compact) AddSimpleTooltip("Set Ghost Opacity");
 	UI::SameLine();
 	UI::PushItemWidth(75);
-	UI::BeginDisabled(!S_GhostOpacityOverrideOnline);
+	UI::BeginDisabled(!S_SetGhostAlphaTo1);
 	S_GhostOpacitySolo = UI::SliderFloat("##ghostopac", S_GhostOpacitySolo, 0, 1);
 	UI::EndDisabled();
 	UI::PopItemWidth();

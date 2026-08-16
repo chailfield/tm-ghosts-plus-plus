@@ -25,7 +25,7 @@ namespace CameraPolish {
         auto mgr = GhostClipsMgr::Get(app);
         if (pg is null || mgr is null) return;
         auto ghost = GhostClipsMgr::GetGhostFromInstanceId(mgr, GetCurrentlySpecdGhostInstanceId(pg));
-        auto entId = Ghosts_PP::GetGhostVisEntityId(ghost);
+        auto entId = Ghosts_Chailfield::GetGhostVisEntityId(ghost);
         // if there's no ghost, we want to keep the last camera pos.
         if (entId == 0x0FF00000) {
             // only set the camera if we have sensible values.

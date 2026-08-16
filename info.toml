@@ -1,8 +1,8 @@
 [meta]
-name     = "Ghosts++"
-author   = "XertroV"
+name     = "Ghosts+++"
+author   = "XertroV + Chailfield"
 category = "MLHook"
-version  = "0.4.8"
+version  = "0.5.0"
 siteid = 444
 
 [script]
@@ -13,4 +13,4 @@ optional_dependencies = ["ChampionMedals"] #, "Dashboard"]
 timeout = 4444
 shared_exports = ["GPP_SharedExports_.as"]
 exports = ["Exports.as"]
-module = "Ghosts_PP"
+module = "Ghosts_Chailfield"

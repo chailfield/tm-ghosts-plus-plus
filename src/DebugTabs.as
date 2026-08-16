@@ -163,9 +163,9 @@ class DebugLaunchedPbGhostTab : Tab {
     void DrawInner() override {
         auto mgr = GhostClipsMgr::Get(GetApp());
         if (mgr is null) UI::Text(Icons::ExclamationTriangle + " GhostClipsMgr is null");
-        auto ix = Ghosts_PP::GetLaunchedCpGhostIx(mgr);
-        auto instanceId = Ghosts_PP::GetLaunchedCpGhostInstanceId(mgr);
-        auto pbGhost = Ghosts_PP::GetLaunchedCpGhost(mgr);
+        auto ix = Ghosts_Chailfield::GetLaunchedCpGhostIx(mgr);
+        auto instanceId = Ghosts_Chailfield::GetLaunchedCpGhostInstanceId(mgr);
+        auto pbGhost = Ghosts_Chailfield::GetLaunchedCpGhost(mgr);
 
         UI::Columns(2);
         DrawValLabel(ix, "PB Ghost Index");
