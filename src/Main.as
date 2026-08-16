@@ -12,7 +12,7 @@ UI::Font@ g_fontMono;
 
 void Main() {
     startnew(CheckMLFeedEnabled);
-    trace('ghosts++ checking permissions');
+    trace('ghosts+++ checking permissions');
     CheckRequiredPermissions();
     trace('checked permissions');
     SetGameVerFlags();
@@ -53,11 +53,11 @@ void Main() {
 void CheckMLFeedEnabled() {
     auto mlhook = Meta::GetPluginFromID("MLHook");
     if (mlhook is null) {
-        NotifyError("MLHook not found. Ghosts++ will not work.");
+        NotifyError("MLHook not found. Ghosts+++ will not work.");
         return;
     }
     if (!mlhook.Enabled) {
-        NotifyError("MLHook is disabled. Please enable it (toggle it on). Ghosts++ will not work otherwise.");
+        NotifyError("MLHook is disabled. Please enable it (toggle it on). Ghosts+++ will not work otherwise.");
         return;
     }
 }
@@ -145,13 +145,13 @@ bool g_Initialized = false;
 void Unload() {
     // nothing to do if game version is not safe, moreover, we might accidentally call unsafe stuff if we do it in this situation
     if (GameVersionSafe) {
-        trace('unloading ghosts++ #1 paused');
+        trace('unloading ghosts+++ #1 paused');
         // if (scrubberPaused) GhostClipsMgr::UnpauseClipPlayers(GhostClipsMgr::Get(GetApp()), 0., 60.0);
         if (scrubberMgr !is null)
             scrubberMgr.ResetAll();
-        trace('unloading ghosts++ #2 mlhook');
+        trace('unloading ghosts+++ #2 mlhook');
         MLHook::UnregisterMLHooksAndRemoveInjectedML();
-        trace('unloading ghosts++ #3 done');
+        trace('unloading ghosts+++ #3 done');
         EngineSounds::Unapply();
         CheckUnhookAllRegisteredHooks();
     }

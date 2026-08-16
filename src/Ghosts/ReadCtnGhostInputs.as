@@ -95,7 +95,7 @@ enum EStart {
     NotStarted, Character, Vehicle, VehicleMix
 }
 
-// namespace Ghosts_PP {
+// namespace Ghosts_Chailfield {
 //     shared interface IInputChange {
 //         int32 get_Tick();
 //         uint64 get_States();
@@ -135,7 +135,7 @@ enum EStart {
 //     }
 // }
 
-class TmInputChange : Ghosts_PP::IInputChange {
+class TmInputChange : Ghosts_Chailfield::IInputChange {
     int tick;
     uint64 states;
     uint16 mouseAccuX;
@@ -196,7 +196,7 @@ class TmInputChange : Ghosts_PP::IInputChange {
 }
 
 
-namespace Ghosts_PP {
+namespace Ghosts_Chailfield {
     IInputChange@[]@ GetGhostInputData(CGameCtnGhost@ ghost) {
         IInputChange@[] ret;
         auto data = GetProcessedGhostInputData(ghost);

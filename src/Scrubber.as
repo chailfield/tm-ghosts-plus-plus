@@ -237,7 +237,8 @@ void DrawScrubber() {
         }
     }
 
-    bool drawAdvOnTop = true;
+    bool drawAdvOnTop = S_ForceShowAdvOnTop
+        || ScrubberWindow::pos.y + ScrubberWindow::ySize * 2. > ScrubberWindow::screenScaled.y;
     if (drawAdvOnTop && ShowAdvancedTools()) ScrubberWindow::pos.y -= (ScrubberWindow::ySize - (ScrubberWindow::spacing.y + ScrubberWindow::fp.y) / UI::GetScale());
 
     ScrubberWindow::SetUpWindow();
@@ -285,7 +286,7 @@ void DrawScrubber() {
     AddSimpleTooltip("Exit ghost spectating");
     UI::SameLine();
         bool expand = UI::Button(Icons::Expand + "##scrubber-expand", vec2(btnWidth, 0));
-        AddSimpleTooltip("Show or hide the Ghosts++ window");
+        AddSimpleTooltip("Show or hide the Ghosts+++ window");
         UI::SameLine();
         clickTogglePause = DrawPlayPauseButton(btnWidth) || clickTogglePause;
         AddSimpleTooltip(scrubberMgr.IsPaused ? "Resume playback" : "Pause playback");
@@ -316,7 +317,8 @@ void DrawScrubber() {
         float minTime = Math::Min(0.0, float(int(ps.Now)) - float(playerStartTime) - 10.0);
         minTime = Math::Max(minTime, -1600.0); // we don't expect the player to have a curr time < -1.5s since that is the start delay.
         auto progBefore = setProg;
-        setProg = UI::SliderFloat("##ghost-scrub", setProg, minTime, maxTime, fmtString, UI::SliderFlags::NoInput);
+        float sliderMax = Math::Max(float(maxTime), Math::Max(float(t), setProg));
+        setProg = UI::SliderFloat("##ghost-scrub", setProg, minTime, sliderMax, fmtString, UI::SliderFlags::NoInput);
         if (resetRun) {
             setProg = 0.0;
             Call_Ghosts_SetStartTime(ps, ps.Now);

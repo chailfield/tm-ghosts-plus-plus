@@ -1,4 +1,4 @@
-namespace Ghosts_PP {
+namespace Ghosts_Chailfield {
     shared interface IInputChange {
         int32 get_Tick();
         uint64 get_States();

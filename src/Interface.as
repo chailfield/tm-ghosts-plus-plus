@@ -506,7 +506,7 @@ class LoadGhostsTab : Tab {
     }
 
     void DrawInner() override {
-        UI::BeginTabBar("ghosts++ load tabs");
+        UI::BeginTabBar("ghosts+++ load tabs");
         g_Favorites.Draw();
         g_Players.Draw();
         g_Saved.Draw();

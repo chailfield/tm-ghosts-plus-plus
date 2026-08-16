@@ -1,4 +1,4 @@
-# Ghosts++
+# Ghosts+++
 
 **Requires MLHook** -- you must also have MLHook installed.
 

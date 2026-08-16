@@ -1,5 +1,5 @@
 [meta]
-name     = "Ghosts++"
+name     = "Ghosts+++"
 author   = "XertroV + Chailfield"
 category = "MLHook"
 version  = "0.5.0"
@@ -13,4 +13,4 @@ optional_dependencies = ["ChampionMedals"] #, "Dashboard"]
 timeout = 4444
 shared_exports = ["GPP_SharedExports_.as"]
 exports = ["Exports.as"]
-module = "Ghosts_PP"
+module = "Ghosts_Chailfield"
