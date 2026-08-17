@@ -324,7 +324,7 @@ void DrawScrubber() {
             if (scrubberMgr.IsPaused) scrubberMgr.SetPaused(0.0, true);
             manualTimelineStartTime = ps.Now;
             hasManualTimelinePosition = true;
-            startnew(CorrectGhostFollowCamera);
+            startnew(RestoreGhostSpectatorStateAfterReset);
             t = 0.0;
         }
         bool startedScrub = UI::IsItemClicked();
@@ -338,7 +338,7 @@ void DrawScrubber() {
             manualTimelineStartTime = ps.Now - int(setProg);
             hasManualTimelinePosition = true;
             if (wasPaused) startnew(CoroutineFuncUserdata(scrubberMgr.EvaluateTimelineSeek), ref(array<double> = {setProg}));
-            startnew(CorrectGhostFollowCameraAfterSeek);
+            startnew(RestoreGhostSpectatorStateAfterSeek);
             t = setProg;
         }
         clickTogglePause = (UI::IsItemHovered() && !scrubberMgr.isScrubbing && UI::IsMouseClicked(UI::MouseButton::Right)) || clickTogglePause;

@@ -23,44 +23,43 @@ UrlTab@ g_UrlTab = UrlTab();
 
 Tab@[]@ tabs = {g_PBTab, g_NearTimeTab, g_AroundRankTab, g_IntervalsTab, g_Favorites, g_LoadGhostTab, g_SaveGhostTab, g_Saved, g_Players, g_Medals, g_DebugTab, g_DebugClips, g_ScrubDebug, g_UrlTab, g_LeaderboardTab};
 
-void CorrectGhostFollowCamera() {
-    yield();
-    yield();
-
-    auto ps = cast<CSmArenaRulesMode>(GetApp().PlaygroundScript);
-    if (ps is null || !IsSpectatingGhost(ps)) return;
-
-    auto targetId = GetCurrentlySpecdGhostInstanceId(ps);
-    if (targetId == 0x0FF00000) return;
-
+void RestoreGhostSpectatorState(CSmArenaRulesMode@ ps, uint targetId, bool updateProgress) {
     ps.UIManager.UIAll.Spectator_SetForcedTarget_Ghost(MwId(targetId));
-    yield();
-    if (IsSpectatingGhost(ps)) {
-        if (scrubberMgr !is null && lastSetStartTime >= 0) {
-            scrubberMgr.SetProgress(Math::Max(0.0, double(ps.Now - lastSetStartTime)), false);
-        }
-        ps.UIManager.UIAll.SpectatorForceCameraType = lastSetForcedCamera = 1;
-        if (S_SpecCamera == ScrubberSpecCamera::None) {
-            GameCamera().ActiveCam = uint(ScrubberSpecCamera::Cam1);
-        }
+    if (!IsSpectatingGhost(ps)) return;
+
+    if (updateProgress && scrubberMgr !is null && lastSetStartTime >= 0) {
+        scrubberMgr.SetProgress(Math::Max(0.0, double(ps.Now - lastSetStartTime)), false);
     }
-}
-
-void CorrectGhostFollowCameraAfterSeek() {
-    yield();
-    yield();
-
-    auto ps = cast<CSmArenaRulesMode>(GetApp().PlaygroundScript);
-    if (ps is null || !IsSpectatingGhost(ps)) return;
-
-    auto targetId = GetCurrentlySpecdGhostInstanceId(ps);
-    if (targetId == 0x0FF00000) return;
-
-    ps.UIManager.UIAll.Spectator_SetForcedTarget_Ghost(MwId(targetId));
     ps.UIManager.UIAll.SpectatorForceCameraType = lastSetForcedCamera = 1;
     if (S_SpecCamera == ScrubberSpecCamera::None) {
         GameCamera().ActiveCam = uint(ScrubberSpecCamera::Cam1);
     }
+}
+
+void RestoreGhostSpectatorStateAfterReset() {
+    yield();
+    yield();
+
+    auto ps = cast<CSmArenaRulesMode>(GetApp().PlaygroundScript);
+    if (ps is null || !IsSpectatingGhost(ps)) return;
+
+    auto targetId = GetCurrentlySpecdGhostInstanceId(ps);
+    if (targetId == 0x0FF00000) return;
+
+    RestoreGhostSpectatorState(ps, targetId, true);
+}
+
+void RestoreGhostSpectatorStateAfterSeek() {
+    yield();
+    yield();
+
+    auto ps = cast<CSmArenaRulesMode>(GetApp().PlaygroundScript);
+    if (ps is null || !IsSpectatingGhost(ps)) return;
+
+    auto targetId = GetCurrentlySpecdGhostInstanceId(ps);
+    if (targetId == 0x0FF00000) return;
+
+    RestoreGhostSpectatorState(ps, targetId, false);
 }
 
 void InitializeGhostFollowCamera(ref@ data) {
@@ -81,11 +80,7 @@ void InitializeGhostFollowCamera(ref@ data) {
     scrubberMgr.SetPaused(scrubberMgr.pauseAt, true);
     sleep(100);
     scrubberMgr.TogglePause(scrubberMgr.pauseAt);
-    ps.UIManager.UIAll.Spectator_SetForcedTarget_Ghost(MwId(targetId));
-    ps.UIManager.UIAll.SpectatorForceCameraType = lastSetForcedCamera = 1;
-    if (S_SpecCamera == ScrubberSpecCamera::None) {
-        GameCamera().ActiveCam = uint(ScrubberSpecCamera::Cam1);
-    }
+    RestoreGhostSpectatorState(ps, targetId, false);
 }
 
 bool IsLocalPlayerReady() {
@@ -131,15 +126,6 @@ void RenderInterface() {
         } else if (!Cache::IsInitialized) {
             UI::Text("Loading...");
         } else {
-            // if (UI::BeginChild("main-lhs", vec2(300., 0))) {
-            //     UI::AlignTextToFramePadding();
-            //     UI::Text("Current Ghosts:");
-            //     UI::Indent();
-            //     g_SaveGhostTab.DrawInner();
-            //     UI::Unindent();
-            // }
-            // UI::EndChild();
-            // UI::SameLine();
             if (UI::BeginChild("main-rhs")) {
             UI::BeginTabBar("save or load ghosts");
             g_SaveGhostTab.Draw();
