@@ -466,20 +466,54 @@ class SaveGhostsTab : Tab {
     void OnMapChange() override {
         saving.RemoveRange(0, saving.Length);
         needsFirstSpectateCameraInit = true;
+        if (currInputs !is null) currInputs.RemoveRange(0, currInputs.Length);
+        showAllInputs = false;
+        showInputsWindow = false;
     }
 
     TmInputChange@[]@ currInputs;
     bool showInputsWindow = false;
+    bool showAllInputs = false;
+    string currInputsKey = "";
     void ShowInputs(CGameCtnGhost@ g) {
+        if (g is null) return;
+        string key = g.GhostLogin + "|" + g.GhostNickname + "|" + tostring(g.RaceTime) + "|" + g.Validate_ChallengeUid.GetName();
+        if (showInputsWindow && currInputsKey == key) {
+            showInputsWindow = false;
+            return;
+        }
         @currInputs = GetProcessedGhostInputData(g);
+        currInputsKey = key;
+        showAllInputs = false;
         showInputsWindow = true;
     }
 
     void DrawInputs() {
         if (!showInputsWindow) return;
         if (UI::Begin("Ghost Inputs", showInputsWindow)) {
-            for (uint i = 0; i < currInputs.Length; i++) {
-                UI::Text(currInputs[i].ToString());
+            if (currInputs is null || currInputs.Length == 0) {
+                UI::Text("Input data is unavailable for this ghost.");
+            } else {
+                uint64 currentTime = scrubberMgr is null ? 0 : uint64(Math::Max(0.0, scrubberMgr.pauseAt));
+                int currentTick = int(Math::Floor((double(currentTime) - double(currInputs[0].startOffset)) / 10.0));
+                currentTick = Math::Max(0, Math::Min(currentTick, int(currInputs.Length - 1)));
+                TmInputChange@ currentInput = currInputs[currentTick];
+                string inputText;
+                if (showAllInputs) {
+                    string[] inputLines;
+                    for (uint i = 0; i < currInputs.Length; i++) {
+                        inputLines.InsertLast(currInputs[i].ToString());
+                    }
+                    inputText = string::Join(inputLines, "\n");
+                    UI::Text("All inputs (" + currInputs.Length + " ticks)");
+                } else {
+                    UI::Text("Replay time: " + Time::Format(int64(currentTime)) + " | Input tick: " + currentInput.Tick);
+                    inputText = currentInput.ToString();
+                }
+                if (UI::Button("Copy input")) IO::SetClipboard(inputText);
+                UI::SameLine();
+                if (UI::Button(showAllInputs ? "Show current" : "Show all")) showAllInputs = !showAllInputs;
+                UI::TextWrapped(inputText);
             }
         }
         UI::End();

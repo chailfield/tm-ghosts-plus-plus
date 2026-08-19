@@ -478,8 +478,10 @@ float DrawAdvancedScrubberExtras(CSmArenaRulesMode@ ps, float btnWidth, bool isS
     auto forcedCamType = ps.UIManager.UIAll.SpectatorForceCameraType;
 
     bool stepBack = UI::Button(scrubberMgr.IsPaused ? Icons::StepBackward : Icons::Backward + "##scrubber-step-back", vec2(btnWidth, 0));
+    AddSimpleTooltip(scrubberMgr.IsPaused ? "Step backward by 1 ms" : "Skip backward by 5 seconds");
     UI::SameLine();
     bool stepFwd = UI::Button((scrubberMgr.IsPaused ? Icons::StepForward : Icons::Forward) + "##scrubber-step-fwd", vec2(btnWidth, 0));
+    AddSimpleTooltip(scrubberMgr.IsPaused ? "Step forward by 1 ms" : "Skip forward by 5 seconds");
     UI::SameLine();
     bool clickCamera = UI::Button(ScrubCameraModeIcon(forcedCamType) + "##scrubber-toggle-cam", vec2(btnWidth, 0));
     bool rmbCamera = UI::IsItemHovered() && UI::IsMouseClicked(UI::MouseButton::Right);
@@ -530,7 +532,7 @@ float DrawAdvancedScrubberExtras(CSmArenaRulesMode@ ps, float btnWidth, bool isS
     // UI::SameLine();
 
     if (stepBack || stepFwd) {
-        auto stepSize = scrubberMgr.IsPaused ? 10.0 * Math::Abs(scrubberMgr.playbackSpeed) : 5000.0 * Math::Abs(scrubberMgr.playbackSpeed);
+        auto stepSize = scrubberMgr.IsPaused ? 1.0 : 5000.0 * Math::Abs(scrubberMgr.playbackSpeed);
         auto targetTime = Math::Clamp(scrubberMgr.pauseAt + stepSize * (stepBack ? -1.0 : 1.0), 0.0, maxTime);
         scrubberMgr.SetProgress(targetTime, false);
         if (scrubberMgr.IsPaused) scrubberMgr.SetPaused(targetTime, true);
@@ -767,7 +769,6 @@ class ScrubberMgr {
             Call_Ghosts_SetStartTime(ps, int(newStartTime));
         }
         if (!IsStdPlayback || !unpausedFlag) {
-            log_debug("pause via setprog: " + IsStdPlayback + ", " + unpausedFlag);
             auto mgr = GhostClipsMgr::Get(GetApp());
             if (mgr !is null) GhostClipsMgr::PauseClipPlayers(mgr, pauseAt / 1000.);
             else log_debug("ScrubberMgr::SetProgress: mgr is null !?");
